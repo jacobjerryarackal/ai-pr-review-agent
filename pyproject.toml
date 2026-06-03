@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prreview"
+version = "0.1.0"
+description = "AI PR review agent - built from scratch, one step at a time."
+requires-python = ">=3.11"
+
+dependencies = [
+    "fastapi>=0.115,<0.116",
+    "uvicorn[standard]>=0.32,<0.33",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9.0",
+    "httpx>=0.27,<0.28",
+]
+
+[tool.setuptools]
+py-modules = ["app"]
