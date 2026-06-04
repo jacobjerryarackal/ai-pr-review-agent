@@ -1,16 +1,14 @@
-import os
 from fastapi import FastAPI
 from redis import asyncio as aioredis
 from qdrant_client import AsyncQdrantClient
 
-app = FastAPI(title="step-08-add-qdrant")
+from settings import get_settings
 
-REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
-QDRANT_URL = os.environ.get("QDRANT_URL", "http://qdrant:6333")
-QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
+app = FastAPI(title="step-09-settings-class")
 
-_redis = aioredis.from_url(REDIS_URL, decode_responses=True)
-_qdrant = AsyncQdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+s = get_settings()
+_redis = aioredis.from_url(s.redis_url, decode_responses=True)
+_qdrant = AsyncQdrantClient(url=s.qdrant_url, api_key=s.qdrant_api_key)
 
 
 @app.get("/health/live")
