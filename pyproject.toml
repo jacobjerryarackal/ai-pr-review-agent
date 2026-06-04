@@ -23,4 +23,4 @@ dev = [
 ]
 
 [tool.setuptools]
-py-modules = ["app"]
+py-modules = ["app", "settings"]
