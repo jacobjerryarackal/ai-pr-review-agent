@@ -12,6 +12,7 @@ dependencies = [
     "fastapi>=0.115,<0.116",
     "uvicorn[standard]>=0.32,<0.33",
     "redis>=5.0,<6.0",
+    "qdrant-client>=1.12,<2.0",
 ]
 
 [project.optional-dependencies]
