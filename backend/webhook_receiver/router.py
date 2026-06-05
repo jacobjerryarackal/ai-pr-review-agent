@@ -31,10 +31,7 @@ async def receive_github_webhook(
         )
     except WebhookValidationError as e:
         logger.warning("webhook signature rejected: %s", e)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
     logger.info("webhook validated: %d bytes", len(raw_body))
     return {"received": True, "bytes": len(raw_body)}
