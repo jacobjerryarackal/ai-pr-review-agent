@@ -12,9 +12,8 @@ class Settings(BaseSettings):
     )
 
     redis_url: str = Field(..., description="redis:// URL")
-    qdrant_url: str = Field(..., description="HTTP URL of Qdrant")
-    qdrant_api_key: Optional[str] = Field(default=None)
-    port: int = Field(default=8000)
+    qdrant_url: str = Field(..., description="qdrant URL")
+    github_webhook_secret: str = Field(..., description="HMAC shared secret")
 
 
 @lru_cache
