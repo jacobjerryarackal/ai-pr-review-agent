@@ -11,6 +11,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    profiles: [local]
 
   qdrant:
     image: qdrant/qdrant:v1.12.4
+    profiles: [local]
