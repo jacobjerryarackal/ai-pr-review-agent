@@ -1,0 +1,13 @@
+{
+  "action": "opened",
+  "pull_request": {
+    "number": 42,
+    "title": "Add greeting function",
+    "body": "First PR for testing the webhook receiver end-to-end.",
+    "head": {"sha": "abc123def456"},
+    "base": {"sha": "0000000000000000000000000000000000000000"}
+  },
+  "repository": {
+    "full_name": "octocat/hello-world"
+  }
+}
