@@ -8,6 +8,7 @@ services:
     depends_on:
       - redis
       - qdrant
+      - postgres
 
   redis:
     image: redis:7-alpine
@@ -16,3 +17,18 @@ services:
   qdrant:
     image: qdrant/qdrant:v1.12.4
     profiles: [local]
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: [local]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prreview
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
