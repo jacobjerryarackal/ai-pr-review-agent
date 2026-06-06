@@ -1,3 +1,5 @@
+"""backend/config/settings.py — adds database_url."""
+
 from functools import lru_cache
 from typing import Optional
 from pydantic import Field
@@ -15,6 +17,12 @@ class Settings(BaseSettings):
     qdrant_url: str = Field(..., description="HTTP URL of Qdrant")
     qdrant_api_key: Optional[str] = Field(default=None)
     github_webhook_secret: str = Field(..., description="HMAC shared secret")
+    database_url: str = Field(
+        ...,
+        description="postgresql+asyncpg://... connection string. "
+                    "Local: postgresql+asyncpg://postgres:postgres@postgres:5432/prreview "
+                    "Cloud (Neon): use ?ssl=require, NOT ?sslmode=require",
+    )
     port: int = Field(default=8000)
 
 
