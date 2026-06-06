@@ -1,4 +1,4 @@
-"""router with idempotency stub."""
+"""router with enqueue."""
 
 import logging
 
@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
 from backend.config.settings import Settings, get_settings
 from backend.core.exceptions import WebhookParseError, WebhookValidationError
+from backend.job_queue.arq_worker import enqueue_review_job
 from backend.webhook_receiver.parser import parse_pull_request_event
 from backend.webhook_receiver.validator import validate_github_signature
 
@@ -13,12 +14,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/webhook", tags=["webhook"])
 
-# Stub for the real Redis SETNX dedupe wired in Phase 4.
 _seen_delivery_ids: set[str] = set()
 
 
 def _is_duplicate_delivery(delivery_id: str | None) -> bool:
-    """Stub idempotency check. Real impl uses Redis SETNX with TTL."""
     if delivery_id is None:
         return False
     if delivery_id in _seen_delivery_ids:
@@ -61,13 +60,16 @@ async def receive_github_webhook(
         logger.warning("parse failed: %s", e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+    job_id = await enqueue_review_job(event)
+
     logger.info(
-        "PR #%d (%s) on %s — action=%s, delivery=%s",
+        "PR #%d (%s) on %s — action=%s, delivery=%s, job=%s",
         event.pull_request.number,
         event.pull_request.title,
         event.repository.full_name,
         event.action.value,
         x_github_delivery,
+        job_id,
     )
     return {
         "received": True,
@@ -75,4 +77,5 @@ async def receive_github_webhook(
         "pr": event.pull_request.number,
         "action": event.action.value,
         "delivery_id": x_github_delivery,
+        "job_id": job_id,
     }
