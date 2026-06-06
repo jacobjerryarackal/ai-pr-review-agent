@@ -1,9 +1,9 @@
+"""HMAC validation; uses central exceptions module."""
+
 import hashlib
 import hmac
 
-
-class WebhookValidationError(Exception):
-    """Raised when a webhook signature is missing or wrong."""
+from backend.core.exceptions import WebhookValidationError
 
 
 def validate_github_signature(
@@ -11,7 +11,6 @@ def validate_github_signature(
     signature_header: str | None,
     secret: str,
 ) -> None:
-    """Validate the X-Hub-Signature-256 header. Raises on failure."""
     if signature_header is None:
         raise WebhookValidationError("missing X-Hub-Signature-256 header")
 
