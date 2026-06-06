@@ -1,14 +1,10 @@
-"""
-backend/webhook_receiver/router.py
-
-Now imports exceptions from backend.core.exceptions.
-"""
+"""router with proper dependency injection."""
 
 import logging
 
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 
-from backend.config.settings import get_settings
+from backend.config.settings import Settings, get_settings
 from backend.core.exceptions import WebhookParseError, WebhookValidationError
 from backend.webhook_receiver.parser import parse_pull_request_event
 from backend.webhook_receiver.validator import validate_github_signature
@@ -23,9 +19,9 @@ async def receive_github_webhook(
     request: Request,
     x_hub_signature_256: str | None = Header(default=None),
     x_github_event: str | None = Header(default=None),
+    settings: Settings = Depends(get_settings),
 ):
     raw_body = await request.body()
-    settings = get_settings()
 
     try:
         validate_github_signature(
