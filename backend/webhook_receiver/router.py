@@ -1,5 +1,3 @@
-"""router with event type filter."""
-
 import logging
 
 from fastapi import APIRouter, Header, HTTPException, Request, status

@@ -1,5 +1,3 @@
-"""tools/sign.py — compute X-Hub-Signature-256 for a payload + secret."""
-
 import hashlib
 import hmac
 import sys

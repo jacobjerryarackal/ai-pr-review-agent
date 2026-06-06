@@ -1,10 +1,3 @@
-"""
-backend/webhook_receiver/validator.py
-
-HMAC-SHA256 signature validation for GitHub webhooks.
-Use hmac.compare_digest, NOT == (avoids timing attacks).
-"""
-
 import hashlib
 import hmac
 
