@@ -1,18 +1,17 @@
-"""router using parser module."""
+"""
+backend/webhook_receiver/router.py
+
+Now imports exceptions from backend.core.exceptions.
+"""
 
 import logging
 
 from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from backend.config.settings import get_settings
-from backend.webhook_receiver.parser import (
-    WebhookParseError,
-    parse_pull_request_event,
-)
-from backend.webhook_receiver.validator import (
-    WebhookValidationError,
-    validate_github_signature,
-)
+from backend.core.exceptions import WebhookParseError, WebhookValidationError
+from backend.webhook_receiver.parser import parse_pull_request_event
+from backend.webhook_receiver.validator import validate_github_signature
 
 logger = logging.getLogger(__name__)
 
