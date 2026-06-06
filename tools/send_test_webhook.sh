@@ -12,7 +12,7 @@ if [ ! -f "$FIXTURE" ]; then
 fi
 
 BODY=$(cat "$FIXTURE")
-SIG=$(python3 tools/sign.py "$BODY" "$SECRET")
+SIG=$(python tools/sign.py "$BODY" "$SECRET")
 DID="local-$(date +%s%N)"
 
 echo ">>> POST $URL"
