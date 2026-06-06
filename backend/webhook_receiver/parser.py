@@ -1,25 +1,17 @@
-"""
-backend/webhook_receiver/parser.py
-
-Single responsibility: bytes + headers → typed WebhookEvent or raise.
-"""
+"""Webhook payload parser; uses central exceptions module."""
 
 import json
 import logging
 
 from pydantic import ValidationError
 
+from backend.core.exceptions import WebhookParseError
 from backend.models.webhook import WebhookEvent
 
 logger = logging.getLogger(__name__)
 
 
-class WebhookParseError(Exception):
-    """Raised when the body is malformed or doesn't fit our schema."""
-
-
 def parse_pull_request_event(raw_body: bytes) -> WebhookEvent:
-    """Parse a pull_request webhook body into a typed WebhookEvent."""
     try:
         payload_dict = json.loads(raw_body)
     except json.JSONDecodeError as e:
