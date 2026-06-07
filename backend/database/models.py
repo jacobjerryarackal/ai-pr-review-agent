@@ -1,8 +1,8 @@
 import hashlib
 from datetime import datetime, timezone
 
-from sqlalchemy import BigInteger, Float, Index, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import BigInteger, Float, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database.postgres import Base
 
@@ -61,6 +61,17 @@ class PRReviewRecord(Base):
 
     # Composite index: when we list reviews per repo ordered by date, this is
     # the access path. Postgres will use it for `WHERE repo_full_name=? ORDER BY created_at DESC`.
+    # ---- relationship to findings -----------------------------------------
+    # selectin loading: when we fetch a PRReviewRecord, SQLAlchemy issues a
+    # second query (SELECT ... WHERE review_id IN (...)) to pull all child
+    # findings in one batch. Avoids N+1 queries when listing reviews.
+    findings: Mapped[list["FindingRecord"]] = relationship(
+        "FindingRecord",
+        back_populates="review",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
     __table_args__ = (
         Index("ix_pr_review_repo_created", "repo_full_name", "created_at"),
     )
@@ -69,3 +80,55 @@ class PRReviewRecord(Base):
     def compute_diff_hash(diff_text: str) -> str:
         """SHA-256 of the diff bytes; used for idempotency."""
         return hashlib.sha256(diff_text.encode("utf-8")).hexdigest()
+
+
+class FindingRecord(Base):
+    """
+    One row per finding produced by a sub-agent (security/quality/test/docs).
+    Many findings per review.
+    """
+
+    __tablename__ = "finding_records"
+
+    # identity
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+
+    # foreign key back to the parent review
+    review_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("pr_review_records.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # denormalized — copy of review.repo_full_name. Why? The hot analytical
+    # query "give me all HIGH+ findings for repo X" should not need to JOIN
+    # against pr_review_records every time. Copying the column trades a tiny
+    # bit of storage and a small write-time cost for very fast reads.
+    # (Storage-Engines wiki: "denormalize for the read pattern you actually
+    #  have, not the read pattern you might one day have.")
+    repo_full_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+
+    # which agent produced it: "security" | "quality" | "test_coverage" | "documentation"
+    agent_type: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    # finding shape
+    severity: Mapped[str] = mapped_column(String(16), nullable=False)   # "critical" | "high" | "medium" | "low"
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+
+    file_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    line_start: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    line_end: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
+
+    created_at: Mapped[datetime] = mapped_column(
+        nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+
+    review: Mapped["PRReviewRecord"] = relationship(
+        "PRReviewRecord",
+        back_populates="findings",
+    )
