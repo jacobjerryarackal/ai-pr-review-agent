@@ -15,6 +15,7 @@ from qdrant_client import AsyncQdrantClient
 
 from backend.config.settings import get_settings
 from backend.database.postgres import create_all_tables, get_engine
+from backend.observability import install_workflow_context_filter
 from backend.webhook_receiver.router import router as webhook_router
 
 
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
     Startup: create any missing tables (idempotent). No Alembic — see ADR-005.
     Shutdown: dispose the SQLAlchemy engine so connections drain cleanly.
     """
+    install_workflow_context_filter()
     await create_all_tables()
     yield
     await get_engine().dispose()
