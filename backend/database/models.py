@@ -132,3 +132,11 @@ class FindingRecord(Base):
         "PRReviewRecord",
         back_populates="findings",
     )
+
+    __table_args__ = (
+        # Composite index for the hot analytical query:
+        #   WHERE repo_full_name = ? AND severity IN ('critical', 'high')
+        # repo_full_name first (high cardinality) prunes the table; severity
+        # filters the slice. Index seek instead of full table scan.
+        Index("ix_finding_repo_severity", "repo_full_name", "severity"),
+    )
