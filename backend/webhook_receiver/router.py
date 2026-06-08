@@ -1,4 +1,9 @@
-"""router with enqueue."""
+"""
+backend/webhook_receiver/router.py
+
+Final shape (for Phase 3): validate, filter, dedupe, parse,
+ENQUEUE, return fast.
+"""
 
 import logging
 
@@ -7,6 +12,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from backend.config.settings import Settings, get_settings
 from backend.core.exceptions import WebhookParseError, WebhookValidationError
 from backend.job_queue.arq_worker import enqueue_review_job
+from backend.observability import reset_workflow_context, set_workflow_context
 from backend.webhook_receiver.parser import parse_pull_request_event
 from backend.webhook_receiver.validator import validate_github_signature
 
@@ -60,7 +66,15 @@ async def receive_github_webhook(
         logger.warning("parse failed: %s", e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    job_id = await enqueue_review_job(event)
+    workflow_id = (
+        f"{event.repository.full_name}:{event.pull_request.number}:"
+        f"{event.pull_request.head.sha}"
+    )
+    token = set_workflow_context(workflow_id=workflow_id, agent_type="webhook")
+    try:
+        job_id = await enqueue_review_job(event)
+    finally:
+        reset_workflow_context(token)
 
     logger.info(
         "PR #%d (%s) on %s — action=%s, delivery=%s, job=%s",
@@ -78,4 +92,5 @@ async def receive_github_webhook(
         "action": event.action.value,
         "delivery_id": x_github_delivery,
         "job_id": job_id,
+        "workflow_id": workflow_id,
     }
