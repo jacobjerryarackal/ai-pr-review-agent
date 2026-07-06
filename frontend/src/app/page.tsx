@@ -1,3 +1,12 @@
+async function getReviews() {
+  const res = await fetch("http://localhost:8000/api/reviews", {
+    cache: "no-store", // don't cache, always fetch fresh
+  });
+  if (!res.ok) throw new Error("Failed to fetch reviews");
+  return res.json();
+}
+
+
 export default function DashboardPage() {
   return (
     <div>
