@@ -1,43 +1,69 @@
-"""Observability package: structured logging + workflow context."""
+"""Phase 10: Observability & Tracing.
 
-import logging
+Public surface for the backend.observability package.
+Import everything from here -- internal module structure may change.
 
-from backend.observability.workflow_context import (
-    WorkflowContext,
-    get_workflow_context,
-    reset_workflow_context,
-    set_workflow_context,
+    from backend.observability import (
+        TraceSpan, TraceContext, traced, async_traced, get_current_trace,
+        StructuredLogger, get_logger,
+        log_llm_call, log_tool_call, log_agent_verdict, log_review_verdict,
+        ReviewEvent,
+        AlertLevel, AlertRule, AlertManager, MetricSnapshot, FiredAlert,
+        AuditLogger,
+    )
+"""
+
+from __future__ import annotations
+
+from backend.observability.alerting import (
+    AlertLevel,
+    AlertManager,
+    AlertRule,
+    FiredAlert,
+    MetricSnapshot,
+    DEFAULT_ALERT_RULES,
+)
+from backend.observability.audit import AuditLogger
+from backend.observability.events import ReviewEvent
+from backend.observability.logging import (
+    StructuredLogger,
+    get_logger,
+    log_agent_verdict,
+    log_llm_call,
+    log_review_verdict,
+    log_tool_call,
+)
+from backend.observability.tracing import (
+    TraceContext,
+    TraceSpan,
+    async_traced,
+    get_current_trace,
+    traced,
 )
 
-
-class WorkflowContextFilter(logging.Filter):
-    """
-    Stamps every LogRecord with workflow_id and agent_type read from the
-    current ContextVar. Attach this filter to the root logger once at
-    startup; every log line emitted thereafter carries the tag for free.
-    """
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        ctx = get_workflow_context()
-        record.workflow_id = ctx.workflow_id or "-"
-        record.agent_type = ctx.agent_type
-        return True
-
-
-def install_workflow_context_filter() -> None:
-    """Attach the filter to the root logger. Idempotent."""
-    root = logging.getLogger()
-    for f in root.filters:
-        if isinstance(f, WorkflowContextFilter):
-            return
-    root.addFilter(WorkflowContextFilter())
-
-
 __all__ = [
-    "WorkflowContext",
-    "WorkflowContextFilter",
-    "get_workflow_context",
-    "install_workflow_context_filter",
-    "reset_workflow_context",
-    "set_workflow_context",
+    # Tracing
+    "TraceSpan",
+    "TraceContext",
+    "traced",
+    "async_traced",
+    "get_current_trace",
+    # Logging
+    "StructuredLogger",
+    "get_logger",
+    "log_llm_call",
+    "log_tool_call",
+    "log_agent_verdict",
+    "log_review_verdict",
+    # Events
+    "ReviewEvent",
+    # Alerting
+    "AlertLevel",
+    "AlertRule",
+    "AlertManager",
+    "MetricSnapshot",
+    "FiredAlert",
+    "DEFAULT_ALERT_RULES",
+    # Audit
+    "AuditLogger",
 ]
