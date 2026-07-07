@@ -176,7 +176,6 @@ async def build_context(state: PRReviewState) -> dict[str, Any]:
             )
 
     # -------------------------------------------------------------------------
-    # -------------------------------------------------------------------------
     # Step 4: RAG context retrieval.
     #
     # WIKI: RAG-Architecture.md
