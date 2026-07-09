@@ -1,45 +1,25 @@
-async function getReviews() {
-  const res = await fetch("http://localhost:8000/api/reviews", {
-    cache: "no-store", // don't cache, always fetch fresh
-  });
-  if (!res.ok) throw new Error("Failed to fetch reviews");
-  return res.json();
-}
+import "./globals.css";
+import type { Metadata } from "next";
+import { SWRProvider } from "@/lib/swr";
+import { Shell } from "@/components/Shell";
 
+export const metadata: Metadata = {
+  title: "AI PR Review",
+  description: "Dashboard for the AI Pull Request Review Agent",
+};
 
-export default function DashboardPage() {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Dashboard
-      </h2>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <StatCard title="Total Reviews" value="1,234" />
-        <StatCard title="Pending Approval" value="12" />
-        <StatCard title="Avg Cost/Review" value="$0.04" />
-        <StatCard title="Avg Time" value="12s" />
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Recent Reviews
-        </h3>
-        <p className="text-gray-500">
-          No reviews yet. Connect your GitHub repository to get started.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <p className="text-sm text-gray-500 mb-1">{title}</p>
-      <p className="text-2xl font-bold text-gray-800">{value}</p>
-    </div>
+    <html lang="en" className="dark">
+      <body>
+        <SWRProvider>
+          <Shell>{children}</Shell>
+        </SWRProvider>
+      </body>
+    </html>
   );
 }
