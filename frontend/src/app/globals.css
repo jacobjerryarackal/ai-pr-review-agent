@@ -2,8 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@theme {
+  --color-bg: #0b0d12;
+  --color-panel: #161c2a;
+  --color-border: #242f47;
+  --color-accent: #60a5fa;
+  --color-muted: #9ca3af;
+  --color-ok: #10b981;
+  --color-warn: #f59e0b;
+  --color-err: #ef4444;
+}
+
 html, body {
-  background-color: #0b0d12;
+  background-color: var(--color-bg);
   color: #e5e7eb;
 }
 
