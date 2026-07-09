@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { DecisionAction } from "@/lib/types";
@@ -25,16 +25,14 @@ export function HITLDecisionForm({ hitlId }: { hitlId: string }) {
   const router = useRouter();
   const [action, setAction] = useState<DecisionAction>("approve");
   const [reason, setReason] = useState("");
-  const [reviewerId, setReviewerId] = useState("");
+  const [reviewerId, setReviewerId] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem(REVIEWER_KEY) || "";
+    }
+    return "";
+  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Restore last-used reviewer on mount.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem(REVIEWER_KEY);
-    if (saved) setReviewerId(saved);
-  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
